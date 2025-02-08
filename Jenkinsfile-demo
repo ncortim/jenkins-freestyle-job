@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('build') {
+            steps {
+                 echo 'build docker image...'
+
+            }
+        }
+        stage('test') {
+            steps {
+                 echo 'test docker image...'
+
+            }
+        }
+        stage('deploy') {
+            steps {
+                echo 'deploy docker image...'
+
+            }
+        }
+
+
+    }
+}
