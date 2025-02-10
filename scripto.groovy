@@ -6,7 +6,7 @@ def testApp() {
     echo 'building the application...'
 }
 
-def deploydApp() {
+def deployApp() {
     echo 'building the application...'
     echo "deploying version ${params.VERSION}"
 }
