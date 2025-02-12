@@ -29,7 +29,7 @@ pipeline {
         stage("build image") {
             steps {
                 script {
-                    buildImage()
+                    buildImage 'ncortim/demo-app:jma-1.4'
                 }
             }
         }
