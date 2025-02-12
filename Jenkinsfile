@@ -1,6 +1,8 @@
 #!/user/bin/env groovy
-
-@Library('jenkins-shared-library')
+library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
+        [$class: 'GitSCMSource',
+        remote: 'https://github.com/ncortim/jenkins-shared-library.git',
+        credentialsId: 'github-repo'])
 
 def gv
 
@@ -29,7 +31,9 @@ pipeline {
         stage("build image") {
             steps {
                 script {
-                    buildImage 'ncortim/demo-app:jma-1.4'
+                    buildImage 'ncortim/demo-app:jma-1.5'
+                    dockerLogin()
+                    dockerPush 'ncortim/demo-app:jma-1.5'
                 }
             }
         }
