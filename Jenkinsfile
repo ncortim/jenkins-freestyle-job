@@ -1,41 +1,48 @@
+def gv
+
 pipeline {
     agent any
+    tools {
+        maven 'maven-3.9.9'
+    }
     stages {
-        stage('init') {
+        stage('increment version') {
             steps {
                 script {
-                    gv = load "scripto-simple.groovy"
+                    echo 'incrementing app version...'
+                    sh 'mvn build-helper:parse-version versions:set \
+                        -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} \
+                        versions:commit'
+                    def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+                    def version = matcher[0][1]
+                    env.IMAGE_NAME = "$version-$BUILD_NUMBER"
                 }
             }
         }
-        stage('test') {
+        stage('build app') {
             steps {
                 script {
-                    gv.testApp()
+                    echo 'building the application...'
+                    sh 'mvn clean package'
                 }
             }
         }
-        stage('build') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
+        stage('build image') {
             steps {
                 script {
-                    gv.buildApp()
+                    echo "building the docker image..."
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        sh "docker build -t ncortim/demo-app:${IMAGE_NAME} ."
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh "docker push ncortim/demo-app:${IMAGE_NAME}"
+                    }
                 }
             }
         }
         stage('deploy') {
-            when {
-                expression {
-                    BRANCH_NAME == 'main'
-                }
-            }
             steps {
                 script {
-                    gv.deployApp()
+                    echo 'deploying docker image...'
                 }
             }
         }
